@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f1e9da">
+  <title>三阶魔方 · 立体与图论观察台</title>
+  <style>
+/*__STYLE__*/
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" aria-label="页眉">
+      <a class="brand" href="#top" aria-label="三阶魔方观察台首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 7.1 12 3l8 4.1v9.8L12 21l-8-4.1Z"/><path d="m4 7.1 8 4.2 8-4.2M12 11.3V21"/></svg>
+        </span>
+        <span class="brand-copy"><b>CUBE ATLAS</b><small>三阶魔方图鉴</small></span>
+      </a>
+      <nav class="section-nav" aria-label="章节导航">
+        <a href="#mesh">01 立体</a>
+        <a href="#map">02 图论</a>
+        <a href="#solver">03 解法</a>
+      </nav>
+      <div class="live-status" title="当前魔方状态">
+        <span class="status-lamp" id="statusLamp" aria-hidden="true"></span>
+        <span id="headerStatus">已还原</span>
+        <span class="live-rule" aria-hidden="true"></span>
+        <span class="live-label">LIVE</span>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="pageTitle">
+        <div class="hero-index" aria-hidden="true">
+          <span>STELLAR NOTE</span>
+          <span>NO. 017</span>
+        </div>
+        <div class="hero-main">
+          <div class="hero-title">
+            <p class="eyebrow">几何结构 / 平面嵌入 / 分步解法</p>
+            <h1 id="pageTitle">三阶魔方<span>立体与图论观察台</span></h1>
+          </div>
+          <p class="hero-intro">以 54 张贴纸为唯一状态，在立体剖面与九环技术图版之间同步观察每一次转动。</p>
+          <div class="seal" aria-label="54 张贴纸，6 个面">
+            <span class="seal-number">54 / 6</span>
+            <span class="seal-caption">贴纸 · 面</span>
+          </div>
+        </div>
+        <div class="hero-meta" aria-hidden="true">
+          <span>3 × 3 × 3</span>
+          <span>WEBGL2</span>
+          <span>OFFLINE</span>
+        </div>
+      </section>
+
+      <div class="workbench">
+        <section class="panel mesh-panel" id="mesh" aria-labelledby="meshTitle">
+          <header class="panel-header">
+            <span class="figure-no">FIG. 01</span>
+            <div class="panel-name">
+              <h2 id="meshTitle">立体剖面</h2>
+              <span>LIVE MESH</span>
+            </div>
+            <span class="panel-meta">26 小块 / 透视 33°</span>
+          </header>
+          <div class="mesh-stage" id="meshStage">
+            <canvas id="cubeCanvas" role="img" aria-label="三阶魔方立体图，当前六面颜色与图论视图同步"></canvas>
+            <div class="webgl-fallback" id="webglFallback" hidden>
+              <b>三维画布不可用</b>
+              <span>当前浏览器未能启动 WebGL 2。图论与求解功能仍可查看。</span>
+            </div>
+            <button class="view-reset" id="resetView" type="button" aria-label="复位三维视角" title="复位视角">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4.2 8.1A6 6 0 1 1 4 12"/><path d="M4.2 3.8v4.5h4.5"/></svg>
+              <span>复位视角</span>
+            </button>
+            <div class="solved-seal" id="solvedSeal" aria-live="polite">
+              <span>已还原</span>
+              <small>SOLVED</small>
+            </div>
+            <div class="turn-readout" id="turnReadout" aria-live="polite"></div>
+            <div class="mesh-legend" aria-label="六面颜色图例">
+              <span><i class="color-dot face-U"></i>U 上</span>
+              <span><i class="color-dot face-R"></i>R 右</span>
+              <span><i class="color-dot face-F"></i>F 前</span>
+              <span><i class="color-dot face-D"></i>D 下</span>
+              <span><i class="color-dot face-L"></i>L 左</span>
+              <span><i class="color-dot face-B"></i>B 后</span>
+            </div>
+            <div class="mesh-coordinates" aria-hidden="true">
+              <span>Y</span><i></i><span>X</span><span>Z</span>
+            </div>
+          </div>
+          <div class="mesh-actions">
+            <button class="text-button" id="scrambleButton" type="button">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M3 6h3.2l7.6 8H17M14.8 5H17v2.2M3 14h3.2l2.3-2.4M11.3 8.4 14 6h3M14.8 12.8V15H17"/></svg>
+              <span>打乱</span>
+            </button>
+            <button class="text-button" id="resetButton" type="button">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4.2 8.1A6 6 0 1 1 4 12"/><path d="M4.2 3.8v4.5h4.5"/></svg>
+              <span>复位</span>
+            </button>
+            <p class="gesture-note">拖动贴纸转层 · 空白处旋转相机 · Shift 转宽层</p>
+          </div>
+        </section>
+
+        <div class="right-stack">
+          <section class="panel graph-panel" id="map" aria-labelledby="mapTitle">
+            <header class="panel-header">
+              <span class="figure-no">FIG. 02</span>
+              <div class="panel-name">
+                <h2 id="mapTitle">图论投影</h2>
+                <span>PLANAR MAP</span>
+              </div>
+              <span class="panel-meta">54 点 / 108 弧</span>
+            </header>
+            <div class="graph-stage">
+              <canvas id="graphCanvas" role="img" aria-label="三阶魔方的九环平面嵌入图，显示 54 个贴纸节点、108 条圆弧和六个面簇"></canvas>
+              <span class="graph-axis-note" aria-hidden="true">X · Y · Z / 3 × 3</span>
+              <div class="graph-turn-note" id="graphTurnNote"></div>
+            </div>
+          </section>
+
+          <section class="panel solver-panel" id="solver" aria-labelledby="solverTitle">
+            <header class="panel-header">
+              <span class="figure-no">FIG. 03</span>
+              <div class="panel-name">
+                <h2 id="solverTitle">解法台</h2>
+                <span>SOLVER</span>
+              </div>
+              <span class="panel-meta" id="solverReady">背景准备中</span>
+            </header>
+            <div class="solver-body">
+              <div class="solver-toolbar">
+                <div class="method-switch" role="group" aria-label="选择求解方法">
+                  <button type="button" class="method-button active" data-method="CFOP" aria-pressed="true">CFOP <small>层先</small></button>
+                  <button type="button" class="method-button" data-method="ROUX" aria-pressed="false">桥式 <small>Roux</small></button>
+                </div>
+                <span class="method-subtitle" id="methodSubtitle">CROSS / F2L / OLL / PLL</span>
+                <button class="solve-button" id="solveButton" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M7 4.6v10.8l8-5.4Z"/></svg>
+                  <span>求解当前状态</span>
+                </button>
+              </div>
+              <div class="stage-cards" id="stageCards" aria-label="阶段进度"></div>
+              <div class="stage-caption" id="stageCaption">
+                <span class="caption-chip" id="stageChip">十字</span>
+                <span id="stageNote">从任意状态生成完整解法</span>
+                <span class="pause-badge" id="pauseBadge" aria-live="polite" hidden>已暂停</span>
+              </div>
+              <ol class="step-list" id="stepList" tabindex="0" aria-label="求解步骤"></ol>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section class="playbar" aria-label="播放控制">
+        <div class="playbar-progress" aria-hidden="true">
+          <div class="stage-ruler" id="stageRuler"></div>
+          <div class="play-progress" id="playProgress"></div>
+        </div>
+        <div class="playbar-main">
+          <div class="transport" role="group" aria-label="步骤播放">
+            <button class="transport-button" id="prevButton" type="button" aria-label="上一步">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M12.8 4.5 7.2 10l5.6 5.5M6 4.5v11"/></svg>
+            </button>
+            <button class="transport-button primary" id="playButton" type="button" aria-label="播放">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M7 4.8v10.4L15 10Z"/></svg>
+              <span>播放</span>
+            </button>
+            <button class="transport-button" id="pauseButton" type="button" aria-label="暂停">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M7 4.5v11M13 4.5v11"/></svg>
+              <span>暂停</span>
+            </button>
+            <button class="transport-button" id="nextButton" type="button" aria-label="下一步">
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m7.2 4.5 5.6 5.5-5.6 5.5M14 4.5v11"/></svg>
+            </button>
+          </div>
+          <div class="play-readout">
+            <span class="progress-stage" id="progressStage">十字</span>
+            <span class="step-counter" id="stepCounter" aria-live="polite">0 / 0</span>
+          </div>
+          <label class="speed-control" for="speedSlider">
+            <span>速度</span>
+            <input id="speedSlider" type="range" min="0.2" max="3" step="0.1" value="1" aria-label="播放速度，0.2 倍至 3 倍">
+            <output id="speedValue" for="speedSlider">1.0×</output>
+          </label>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>三阶魔方 · 立体与图论观察台</p>
+      <p>54 张贴纸 / 6 个面 / 108 条图论圆弧</p>
+      <p>离线单文件 · 纸墨图鉴版</p>
+    </footer>
+  </div>
+  <div class="sr-only" id="liveAnnouncer" aria-live="polite"></div>
+  <script>
+/*__SCRIPT__*/
+  </script>
+</body>
+</html>
